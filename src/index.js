@@ -24,7 +24,15 @@ function checksExistsUserAccount(request, response, next) {
 }
 
 function checksCreateTodosUserAvailability(request, response, next) {
-  // Complete aqui
+  const { user } = request;
+
+  if (!user.pro) {
+    if (user.todos.length >= 10) {
+      return response.status(403).json({ error: "User is not Pro yet." });
+    }
+  }
+
+  next();
 }
 
 function checksTodoExists(request, response, next) {
@@ -34,7 +42,11 @@ function checksTodoExists(request, response, next) {
   const user = findUserbyUsername(username);
 
   if (!validate(id)) {
-    return response.status(404).json({ error: "Id não é um UUID válido!" });
+    return response.status(400).json({ error: "Id não é um UUID válido!" });
+  }
+
+  if (!user) {
+    return response.status(404).json({ error: "User not found!" });
   }
 
   const todo = user.todos.find((todo) => todo.id === id);
